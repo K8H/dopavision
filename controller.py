@@ -5,7 +5,7 @@ import time
 import curses
 import psycopg2
 
-from distance import distance_controller, moving_average
+from distance import distance_controller, signal_processing
 
 def db_connection(dbName='dopavision'):
     logging.debug('Connecting to database %s' % dbName)
@@ -18,12 +18,12 @@ def run():
     logging.debug('Run controller')
     cur = db_connection()
     
-    while False:
-        dist_ctrl = distance_controller.DistanceController()
-        dist_ctrl.run(cur)
+    # get data from sensor for specific number of iterations
+    dist_ctrl = distance_controller.DistanceController()
+    dist_ctrl.run(cur)
 
-    moving_avg = moving_average.MovingAverage()
-    moving_avg.calcMovingAvg(cur)
+    signal_proc = signal_processing.SignalProcessing()
+    signal_proc.calcMovingAvg(cur)
 
     while False:
         damn = curses.initscr()

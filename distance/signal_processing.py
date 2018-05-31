@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-class MovingAverage(object):
+class SignalProcessing(object):
 
     def __init__(self, avgTimeMinLen=20):
         '''
@@ -16,9 +16,8 @@ class MovingAverage(object):
         '''
         Calculates average in defined time period and writes a result into datatable.
         '''
-        query = 'insert into %s (moving_average) values (select avg(dist.%s) over(order by dist.%s rows between %s preceding and current row) as %s from %s dist)' % (self.dbTableName, self.dbDistanceColumnName, self.dbTimestampColumnName, self.avgTimeMinLen, self.dbColumnName, self.dbTableName)
-        #print(query)
+        withQuery = 'with new_values as'
+        selectQuery = 'select id, avg(dist.%s) over(order by dist.%s rows between %s preceding and current row) as %s from %s dist' % (self.dbDistanceColumnName, self.dbTimestampColumnName, self.avgTimeMinLen, self.dbColumnName, self.dbTableName)
+        updateQuery = 'update %s as dist set %s = nv.%s from new_values nv where nv.id = dist.id;' % (self.dbTableName, self.dbColumnName, self.dbColumnName)        
+        query = withQuery + ' (' + selectQuery + ') ' + updateQuery
         dbCursor.execute(query)
-        rows = dbCursor.fetchall()
-        print(len(rows))
-        
